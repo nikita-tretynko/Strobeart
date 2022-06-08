@@ -15,6 +15,7 @@ use App\Http\Requests\UpdateTimeDownloadRequest;
 use App\Http\Requests\UploadWorkImageRequest;
 use App\Http\Requests\WorkImageRequest;
 use App\Http\Responses\ApiErrorResponse;
+use App\Jobs\SendEmailJob;
 use App\Jobs\TransferMoneyToEditor;
 use App\Libraries\CookieInstagram\InstaLite\Exception;
 use App\Models\ChatImage;
@@ -26,6 +27,7 @@ use App\Http\Responses\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\ReviewsAboutEditor;
+use App\Models\User;
 use App\Repositories\ImageRepository;
 use App\Repositories\JobRepository;
 use App\Models\UserWorkJob;
@@ -328,7 +330,7 @@ class JobController extends Controller
                     'image_jobs_id' => $data['image_jobs_id'],
                     'status' => WorkedImagesStatusEnum::$START_TIME,
                     'timer' => 0,
-                    'sum_timers' => $work_image->timer ??0,
+                    'sum_timers' => $work_image->timer ?? 0,
                     'start_timer' => $this->getIsoDateTime(),
                 ]);
             }
@@ -512,6 +514,18 @@ class JobController extends Controller
         Image::whereIn('id', $decline_img_id)
             ->update(['decline' => 1, 'message' => $data['message']]);
 
+        try {
+            $text = 'Some images were returned back. Please check my comments: ' . $data['message'];
+            $this->twilioService->sendMessage($user, "channel-" . $image_job->id, $text);
+            $wi = WorkedImage::where('image_jobs_id', $image_job->id)
+                ->whereIn('image_id', $decline_img_id)->first();
+            $editor = User::find($wi->user_id);
+            $link = getenv("LINK_APP").'/job/'.$image_job->id.'/chat';
+            SendEmailJob::dispatch($editor->email, $text, $user->name, $link);
+        } catch (\Exception $exception) {
+            Log::info('ERROR '.$exception);
+        }
+
         return new ApiResponse();
     }
 
@@ -574,7 +588,7 @@ class JobController extends Controller
         if ($user->is_business()) {
             $past_jobs = ImageJob::where('user_id', $user->id)
                 ->where('status', ImageJobStatusEnum::$FINISHED)
-                ->with('images', 'images_decline')
+                ->with('images', 'images_decline','user_work.user','review')
                 ->withSum('finished_worked_images', 'sum_timers')
                 ->get();
         } else {
@@ -586,6 +600,6 @@ class JobController extends Controller
                 ->get();
         }
 
-        return new ApiResponse(compact('past_jobs','user'));
+        return new ApiResponse(compact('past_jobs', 'user'));
     }
 }

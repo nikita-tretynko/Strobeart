@@ -27,7 +27,7 @@ class PublishingImagesInstagramJob implements ShouldQueue
     private string $password_instagram;
     private ImageService $imageService;
     private InstagramConnects $connect_instagram;
-    private WorkedImage $workedImage;
+    private  $workedImage;
 
 
     /**
@@ -35,7 +35,7 @@ class PublishingImagesInstagramJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(WorkedImage $workedImage,PublishingFiles $publishingFiles, InstagramConnects $connect_instagram)
+    public function __construct($workedImage,PublishingFiles $publishingFiles, InstagramConnects $connect_instagram)
     {
         $this->publishingFiles = $publishingFiles;
         $this->connect_instagram = $connect_instagram;
@@ -60,7 +60,6 @@ class PublishingImagesInstagramJob implements ShouldQueue
                 });
             }
             $post_images_chunk = array_chunk($photos->toArray(), 10);
-
             foreach ($post_images_chunk as $item_images) {
                 if (count($item_images) === 1) {
                     $image = explode('storage/', $item_images[0]['image_url'])[1];
@@ -69,17 +68,7 @@ class PublishingImagesInstagramJob implements ShouldQueue
                     $instagram_service->publishOnePhoto($this->connect_instagram->instagram_id, $url_img, $this->publishingFiles->description . ' ' . $this->publishingFiles->hashtags);
                     Storage::disk('public')->delete($convert_imd_patch);
                 } else {
-                    $id_img = [];
-                    foreach ($item_images as $image) {
-                        $image1 = explode('storage/', $image['image_url'])[1];
-                        $convert_imd_patch = $this->imageService->convertImageForInstagram($image1);
-                        $url_img = URL::to('/') . '/storage' . $convert_imd_patch;
-                        $id_cont = $instagram_service->createItemContainer($this->connect_instagram->instagram_id, $url_img, $this->connect_instagram->token);
-                        $id_img[] = $id_cont;
-                        Storage::disk('public')->delete($convert_imd_patch);
-                    }
-                    $id_container = $instagram_service->createCarouselContainer($this->connect_instagram->instagram_id, $id_img, $this->connect_instagram->token, $this->publishingFiles->description . ' ' . $this->publishingFiles->hashtags);
-                    $instagram_service->publishCarouselContainer($this->connect_instagram->instagram_id, $id_container, $this->connect_instagram->token);
+                 PublishImageInstagramCarusel::dispatch($this->connect_instagram->instagram_id,$item_images, $this->connect_instagram->token, $this->publishingFiles->description . ' ' . $this->publishingFiles->hashtags);
                 }
             }
         } catch (\Exception $exception) {

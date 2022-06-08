@@ -17,7 +17,7 @@
                         <div class="info_user">
                             <div v-if="is_type_user===editor" class="item_info item_info_mb">
                                 <img class="style_icon" src='@/assets/icons/star.svg' alt="">
-                                <div class="title_info">5.0</div>
+                                <div class="title_info">{{ avgRating() }}</div>
                             </div>
                             <div v-if="is_type_user===business" class="item_info">
                                 <img class="style_icon" src='@/assets/icons/business-center.svg' alt="">
@@ -63,9 +63,9 @@
                                         class="card_job card_job_s cp"
                                         v-if="past_jobs.length"
                                         v-for="(job, index) in past_jobs"
-                                        @click="sheduleFile(job)"
                                         :key="'job-card-' + index">
-                                        <div class="img_div">
+                                        <div @click="sheduleFile(job)" class="img_div"
+                                             :class="{'img_div_editor':is_type_user===editor}">
                                             <img
                                                 :src="mainImage(job)"
                                                 class="card-img-top"
@@ -80,16 +80,77 @@
                                                 {{ job.style_guide }}
                                             </div>
                                         </div>
-
-                                        <div class="loader_line">
-                                            <div class="done" style="width:100%"></div>
-                                        </div>
-
-                                        <div class="card_body text-center">
-                                            All files approved
-                                        </div>
+                                        <template v-if="is_type_user===editor">
+                                            <div class="loader_line">
+                                                <div class="done" style="width:100%"></div>
+                                            </div>
+                                            <div class="card_body text-center">
+                                                All files approved
+                                            </div>
+                                        </template>
+                                        <template v-else>
+                                            <div v-if="!isEmptyObject(job.review)" @click="openReviewModal(job)"
+                                                 class="leave-review">
+                                                Leave Review
+                                            </div>
+                                            <div class="rating_job" v-else>
+                                                <star-rating
+                                                    v-model="job.review.rating"
+                                                    :show-rating="false"
+                                                    v-bind:star-size="22"
+                                                    inactive-color="#D1D2D3"
+                                                    active-color="#D8C3AF"
+                                                    :read-only="true"
+                                                >
+                                                </star-rating>
+                                            </div>
+                                        </template>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="is_type_user===editor" class="review_colum">
+                    <div class="title_r">Reviews</div>
+                    <div class="review_items">
+                        <div class="review_item" v-for="review in editor_reviews">
+                            <div class="header_box_review">
+                                <div>
+                                    <img v-if="getAvatar(review.user)" class="avatar" :src="getAvatar(review.user)"
+                                         alt="avatar">
+                                    <img v-else class="avatar" src='@/assets/images/sbcf-default-avatar.png' alt="">
+                                </div>
+                                <div>
+                                    <star-rating
+                                        v-model="review.rating"
+                                        :show-rating="false"
+                                        v-bind:star-size="18"
+                                        inactive-color="#D1D2D3"
+                                        active-color="#494949"
+                                        :read-only="true"
+                                    >
+                                    </star-rating>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-3 mt-4">
+                                <div>
+                                    <svg width="15" height="13" viewBox="0 0 15 13" fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <g clip-path="url(#clip0_3328_3146)">
+                                            <path
+                                                d="M6.40167 2.11288L5.85774 1.31543C2.09205 3.72771 0 6.65833 0 9.07061C0 11.4031 1.79916 12.4996 3.32636 12.4996C5.25105 12.4996 6.61088 10.9446 6.61088 9.30985C6.61088 7.93425 5.69038 6.75801 4.45607 6.31942C4.10042 6.1998 3.76569 6.10012 3.76569 5.52197C3.76569 4.78433 4.33054 3.68784 6.40167 2.11288ZM14.7071 2.11288L14.1632 1.31543C10.4393 3.72771 8.30544 6.65833 8.30544 9.07061C8.30544 11.4031 10.1464 12.4996 11.6736 12.4996C13.6192 12.4996 15 10.9446 15 9.30985C15 7.93425 14.0586 6.75801 12.7824 6.31942C12.4268 6.1998 12.113 6.10012 12.113 5.52197C12.113 4.78433 12.6987 3.68784 14.7071 2.11288Z"
+                                                fill="#494949"/>
+                                        </g>
+                                        <defs>
+                                            <clipPath id="clip0_3328_3146">
+                                                <rect width="15" height="12.5" fill="white"/>
+                                            </clipPath>
+                                        </defs>
+                                    </svg>
+
+                                </div>
+                                <div class="review_message">{{ review.message }}</div>
                             </div>
                         </div>
                     </div>
@@ -137,12 +198,24 @@
                                                 <div> {{ style.resolution }} {{ style.resolution_units }}</div>
                                             </li>
                                             <li> Logo
-                                                <div>20 px; right, bottom</div>
+                                                <div>{{ styleFileLogo(style) }}</div>
+                                            </li>
+                                            <li> Watermark
+                                                <div>{{ styleFileWatermark(style) }}</div>
                                             </li>
                                             <li> Video
-                                                <div><a class="video_href" :href="style.video_instructions"
-                                                        target="_blank">{{ style.name }}.mp4</a>
+                                                <div><a class="video_href"
+                                                        :href="style.file_video_instructions.file_url"
+                                                        target="_blank">{{
+                                                        style.file_video_instructions.file_name
+                                                    }}.{{ style.file_video_instructions.type }}</a>
                                                 </div>
+                                            </li>
+                                            <li> Color palette
+                                                <div>{{ styleFileColorPalette(style) }}</div>
+                                            </li>
+                                            <li> Typography
+                                                <div>{{ styleFileTypography(style) }}</div>
                                             </li>
                                         </ul>
                                     </div>
@@ -226,14 +299,16 @@
                                         </div>
                                         <div class="input_item">
                                             <div class="title_form">Color Profile</div>
-                                            <div class="input_b1"><select v-model="style_guide.color_profile"
-                                                                          :class="{ 'is-invalid': errors.color_profile}"
-                                                                          class="style_input1 form-select">
-                                                <option selected disabled hidden value=""> RBG, CMYK, ICC...</option>
-                                                <option key="RBG">RBG</option>
-                                                <option key="CMYK">CMYK</option>
-                                                <option key="ICC">ICC</option>
-                                            </select>
+                                            <div class="input_b1">
+                                                <select v-model="style_guide.color_profile"
+                                                        :class="{ 'is-invalid': errors.color_profile}"
+                                                        class="style_input1 form-select">
+                                                    <option selected disabled hidden value=""> RBG, CMYK, ICC...
+                                                    </option>
+                                                    <option key="RBG">RBG</option>
+                                                    <option key="CMYK">CMYK</option>
+                                                    <option key="ICC">ICC</option>
+                                                </select>
                                                 <div class="invalid-feedback">
                                                     This field is required
                                                 </div>
@@ -255,38 +330,65 @@
                                         <div class="input_item">
                                             <div class="title_form">Logo</div>
                                             <div class="input_b1">
-                                                <div @click="openFileLogo" class="with_logo style_input1 cp st_text">
-                                                    {{ fileName(uploaded_logo) }}
-                                                </div>
-                                                <input type="file" ref="logo_file" @change="uploadFileLoad" hidden>
+                                                <select v-model="style_guide.file_id_logo"
+                                                        class="style_input1 form-select">
+                                                    <option selected disabled hidden value="">Logo</option>
+                                                    <option v-for="file in user_files" :value="file.id" :key="file.id">
+                                                        {{ file.file_name }}
+                                                    </option>
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="input_item">
                                             <div class="title_form">Watermark</div>
                                             <div class="input_b1">
-                                                <div @click="openFileWatermark"
-                                                     class="with_watermark style_input1 cp st_text">
-                                                    {{ fileName(upload_watermark) }}
-                                                </div>
-                                                <input type="file" ref="watermark" @change="uploadFileWaterMark"
-                                                       accept="image/*"
-                                                       hidden>
+                                                <select v-model="style_guide.file_id_watermark"
+                                                        class="style_input1 form-select">
+                                                    <option selected disabled hidden value="">Watermark</option>
+                                                    <option v-for="file in user_files" :value="file.id" :key="file.id">
+                                                        {{ file.file_name }}
+                                                    </option>
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="input_item">
                                             <div class="title_form">Video Instructions</div>
                                             <div class="input_b1">
-                                                <div :class="{ 'is-invalid_c': errors.video_instructions}"
-                                                     @click="openFileVideoInstructions"
-                                                     class="with_video_i style_input1 cp st_text">
-                                                    {{ fileName(video_instructions) }}
-                                                </div>
-                                                <input type="file" ref="video_instructions_file"
-                                                       @change="uploadVideoInstruction"
-                                                       hidden>
+                                                <select v-model="style_guide.file_id_video_instructions"
+                                                        class="style_input1 form-select">
+                                                    <option selected disabled hidden value="">Video Instructions
+                                                    </option>
+                                                    <option v-for="file in user_files" :value="file.id" :key="file.id">
+                                                        {{ file.file_name }}
+                                                    </option>
+                                                </select>
                                                 <div v-if="errors.video_instructions" class="invalid-feedback_c">
                                                     This field is required
                                                 </div>
+                                            </div>
+                                        </div>
+                                        <div class="input_item">
+                                            <div class="title_form">Color palette</div>
+                                            <div class="input_b1">
+                                                <select v-model="style_guide.file_id_color_palette"
+                                                        class="style_input1 form-select">
+                                                    <option selected disabled hidden value="">Color palette</option>
+                                                    <option v-for="file in user_files" :value="file.id" :key="file.id">
+                                                        {{ file.file_name }}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="input_item">
+                                            <div class="title_form">Typography</div>
+                                            <div class="input_b1">
+                                                <select v-model="style_guide.file_id_video_typography"
+                                                        class="style_input1 form-select">
+                                                    <option selected disabled hidden value="">Typography</option>
+                                                    <option v-for="file in user_files" :value="file.id" :key="file.id">
+                                                        {{ file.file_name }}
+                                                    </option>
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="input_item">
@@ -394,7 +496,72 @@
                         </div>
                     </div>
                     <div v-if="tab===3">
-                        <div class="tab_item_d"></div>
+                        <div class="tab_item_d2">
+                            <div class="box_search_sample_work">
+                                <div class="search_sample_work">
+                                    <input @keyup="keypressSearchFile" type="text" class="search_prod_inp"
+                                           placeholder="">
+                                    <img class="search_icon" src="@/assets/icons/search.svg" alt="">
+                                </div>
+                            </div>
+                            <div class="sample_work margin_box_f">
+                                <div class="spw_item2" v-for="item in search_file">
+                                    <div @click="selectFile(item.id)" class="item_sample_work">
+                                        <div class="d-flex">
+                                            <div class="box_sample_work_img_item img_file">
+                                                <template
+                                                    v-if="item.type==='png'||item.type==='jpeg'||item.type==='jpg'">
+                                                    <img class="img_item_w p-2" :src=item.file_url
+                                                         alt="">
+                                                </template>
+                                                <template v-else>
+                                                    <div class="img_item_w p-2 type_box_f">.{{ item.type }}</div>
+                                                </template>
+                                            </div>
+                                            <div class="box_file_n">
+                                                <div class="title_file_name">{{ item.file_name }}</div>
+                                                <div class="file_type" @click="goPageFile(item.file_url)">
+                                                    {{ item.type }}
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <!--                                        <div class="arrow_select">-->
+                                        <!--                                            <svg width="21" height="21" viewBox="0 0 21 21" fill="none"-->
+                                        <!--                                                 xmlns="http://www.w3.org/2000/svg">-->
+                                        <!--                                                <path-->
+                                        <!--                                                    d="M18.8528 6.94727C18.6066 6.70121 18.2729 6.56299 17.9248 6.56299C17.5768 6.56299 17.243 6.70121 16.9969 6.94727L10.5 13.4441L4.00315 6.94727C3.75561 6.70819 3.42407 6.5759 3.07994 6.57889C2.73581 6.58188 2.40661 6.71991 2.16327 6.96326C1.91992 7.20661 1.78189 7.5358 1.7789 7.87993C1.77591 8.22406 1.9082 8.5556 2.14728 8.80314L9.57209 16.228C9.81822 16.474 10.152 16.6122 10.5 16.6122C10.8481 16.6122 11.1818 16.474 11.428 16.228L18.8528 8.80314C19.0988 8.55701 19.2371 8.22324 19.2371 7.87521C19.2371 7.52718 19.0988 7.1934 18.8528 6.94727Z"-->
+                                        <!--                                                    fill="#494949"/>-->
+                                        <!--                                            </svg>-->
+                                        <!--                                        </div>-->
+                                    </div>
+                                    <!--                                    <div class="box_images_work" v-if="select_file==='file1'">-->
+                                    <!--                                        <div class="featured-products">-->
+                                    <!--                                          `12345678-->
+                                    <!--                                        </div>-->
+                                    <!--                                    </div>-->
+                                </div>
+                                <div class="spw_item2">
+                                    <div @click="openModalAddFile" class="item_sample_work">
+                                        <div class="d-flex">
+                                            <div class="box_sample_work_img_item">
+                                                <img class="plus_icon" src='@/assets/images/Plus.png'
+                                                     alt="">
+                                            </div>
+                                            <div class="title_name_work">Add New File</div>
+                                        </div>
+                                        <!--                                        <div class="arrow_select">-->
+                                        <!--                                            <svg width="21" height="21" viewBox="0 0 21 21" fill="none"-->
+                                        <!--                                                 xmlns="http://www.w3.org/2000/svg">-->
+                                        <!--                                                <path-->
+                                        <!--                                                    d="M18.8528 6.94727C18.6066 6.70121 18.2729 6.56299 17.9248 6.56299C17.5768 6.56299 17.243 6.70121 16.9969 6.94727L10.5 13.4441L4.00315 6.94727C3.75561 6.70819 3.42407 6.5759 3.07994 6.57889C2.73581 6.58188 2.40661 6.71991 2.16327 6.96326C1.91992 7.20661 1.78189 7.5358 1.7789 7.87993C1.77591 8.22406 1.9082 8.5556 2.14728 8.80314L9.57209 16.228C9.81822 16.474 10.152 16.6122 10.5 16.6122C10.8481 16.6122 11.1818 16.474 11.428 16.228L18.8528 8.80314C19.0988 8.55701 19.2371 8.22324 19.2371 7.87521C19.2371 7.52718 19.0988 7.1934 18.8528 6.94727Z"-->
+                                        <!--                                                    fill="#494949"/>-->
+                                        <!--                                            </svg>-->
+                                        <!--                                        </div>-->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div v-if="add_style_guide" class="style_guide_box">
                         <div class="title-1">Add Style Guide</div>
@@ -492,37 +659,64 @@
                                 <div class="input_item">
                                     <div class="title_form">Logo</div>
                                     <div class="input_b1">
-                                        <div @click="openFileLogo" class="with_logo style_input1 cp st_text">
-                                            {{ fileName(uploaded_logo) }}
-                                        </div>
-                                        <input type="file" ref="logo_file" @change="uploadFileLoad" hidden>
+                                        <select v-model="style_guide.file_id_logo"
+                                                class="style_input1 form-select">
+                                            <option selected disabled hidden value="">Logo</option>
+                                            <option v-for="file in user_files" :value="file.id" :key="file.id">
+                                                {{ file.file_name }}
+                                            </option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="input_item">
                                     <div class="title_form">Watermark</div>
                                     <div class="input_b1">
-                                        <div @click="openFileWatermark" class="with_watermark style_input1 cp st_text">
-                                            {{ fileName(upload_watermark) }}
-                                        </div>
-                                        <input type="file" ref="watermark" @change="uploadFileWaterMark"
-                                               accept="image/*"
-                                               hidden>
+                                        <select v-model="style_guide.file_id_watermark"
+                                                class="style_input1 form-select">
+                                            <option selected disabled hidden value="">Watermark</option>
+                                            <option v-for="file in user_files" :value="file.id" :key="file.id">
+                                                {{ file.file_name }}
+                                            </option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="input_item">
                                     <div class="title_form">Video Instructions</div>
                                     <div class="input_b1">
-                                        <div :class="{ 'is-invalid_c': errors.video_instructions}"
-                                             @click="openFileVideoInstructions"
-                                             class="with_video_i style_input1 cp st_text">
-                                            {{ fileName(video_instructions) }}
-                                        </div>
-                                        <input type="file" ref="video_instructions_file"
-                                               @change="uploadVideoInstruction"
-                                               hidden>
+                                        <select v-model="style_guide.file_id_video_instructions"
+                                                class="style_input1 form-select">
+                                            <option selected disabled hidden value="">Video Instructions</option>
+                                            <option v-for="file in user_files" :key="file.id" :value="file.id">
+                                                {{ file.file_name }}
+                                            </option>
+                                        </select>
                                         <div v-if="errors.video_instructions" class="invalid-feedback_c">
                                             This field is required
                                         </div>
+                                    </div>
+                                </div>
+                                <div class="input_item">
+                                    <div class="title_form">Color palette</div>
+                                    <div class="input_b1">
+                                        <select v-model="style_guide.file_id_color_palette"
+                                                class="style_input1 form-select">
+                                            <option selected disabled hidden value="">Color palette</option>
+                                            <option v-for="file in user_files" :value="file.id" :key="file.id">
+                                                {{ file.file_name }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="input_item">
+                                    <div class="title_form">Typography</div>
+                                    <div class="input_b1">
+                                        <select v-model="style_guide.file_id_video_typography"
+                                                class="style_input1 form-select">
+                                            <option selected disabled hidden value="">Typography</option>
+                                            <option v-for="file in user_files" :value="file.id" :key="file.id">
+                                                {{ file.file_name }}
+                                            </option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="input_item">
@@ -553,6 +747,63 @@
                 </div>
             </div>
         </div>
+        <div class="modal" id="addFileModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add New File</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="fileNameInput1" class="form-label">File name</label>
+                            <input type="text" :class="{ 'is-invalid': upload_file.file_name_valid }"
+                                   class="form-control" v-model="upload_file.file_name" id="fileNameInput1"
+                                   placeholder="File name">
+                            <div class="invalid-feedback">{{ upload_file.file_name_valid }}</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fileInput2" class="form-label">File</label>
+                            <input ref="fileupload" @change="uploadFileChange" type="file"
+                                   :class="{ 'is-invalid': upload_file.file_valid }" class="form-control"
+                                   id="fileInput2" placeholder="File">
+                            <div class="invalid-feedback">{{ upload_file.file_valid }}</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn_modal_t1" data-bs-dismiss="modal">Cancel</button>
+                        <button class="btn_modal_t2" @click="uploadFile">Upload</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal" id="reviewModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title review_title">Tell everyone how was it to work with
+                            {{ add_review.editor_name }}</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="box_body">
+                            <star-rating
+                                v-model="add_review.rating"
+                                :show-rating="false"
+                                v-bind:star-size="22"
+                                inactive-color="#D1D2D3"
+                                active-color="#D8C3AF"
+                            >
+                            </star-rating>
+                            <textarea rows="4" v-model="add_review.message" placeholder="Leave a review..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn_modal_t1" data-bs-dismiss="modal">Cancel</button>
+                        <button class="btn_modal_t2" @click="postReview">Post</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -564,12 +815,14 @@ import {mapMutations} from "vuex";
 import TypeUserEnum from "@/enums/TypeUserEnum";
 import ChatsMessageCount from "../components/ChatsMessageCount";
 import {Modal} from "bootstrap";
+import StarRating from 'vue-star-rating'
 
 export default {
     name: 'Profile',
     components: {
         MainLayout,
-        ChatsMessageCount
+        ChatsMessageCount,
+        StarRating
     },
     data() {
         return {
@@ -598,10 +851,13 @@ export default {
                 resolution: '300',
                 resolution_units: 'dpi',
                 other: '',
+                file_id_logo: '',
+                file_id_watermark: '',
+                file_id_video_instructions: '',
+                file_id_video_typography: '',
+                file_id_color_palette: '',
             },
-            uploaded_logo: null,
-            upload_watermark: null,
-            video_instructions: null,
+
             errors: {
                 name: false,
                 remove_background: false,
@@ -613,17 +869,44 @@ export default {
                 resolution: false,
                 video_instructions: false,
                 color_profile: false
-            }
+            },
+            select_file: '',
+            addFileModal: null,
+            upload_file: {
+                file: null,
+                file_name: '',
+                file_valid: false,
+                file_name_valid: false
+            },
+            user_files: {},
+            search_file: {},
+            reviewModal: null,
+            add_review: {
+                editor_name: '',
+                rating: 0,
+                editor_id: null,
+                image_job_id: null,
+                message: '',
+            },
+            editor_reviews: [],
         }
     },
     destroyed() {
         if (this.photoModal) {
             this.photoModal.dispose()
         }
+        if (this.addFileModal) {
+            this.addFileModal.dispose()
+        }
+        if (this.reviewModal) {
+            this.reviewModal.dispose()
+        }
     },
     async mounted() {
         await this.getProfileUser()
         this.photoModal = new Modal(document.getElementById('photoModal'))
+        this.addFileModal = new Modal(document.getElementById('addFileModal'))
+        this.reviewModal = new Modal(document.getElementById('reviewModal'))
         await this.isQueryRouteParam();
     },
     methods: {
@@ -632,6 +915,110 @@ export default {
             'hideLoader',
             'setUser',
         ]),
+        styleFileLogo(style) {
+            return style?.file_logo?.file_name || 'No'
+        },
+        styleFileWatermark(style) {
+            return style?.file_watermark?.file_name || 'No'
+        },
+        styleFileColorPalette(style) {
+            return style?.file_id_color_palette?.file_name || 'No'
+        },
+        styleFileTypography(style) {
+            return style?.file_id_video_typography?.file_name || 'No'
+        },
+        avgRating() {
+            if (this.user?.avg_rating) {
+                return Number(this.user?.avg_rating).toFixed(1)
+            }
+            return 0;
+        },
+        isEmptyObject(obj) {
+            if (obj) {
+                return Object.keys(obj).length !== 0;
+            }
+            return 0;
+        },
+        async postReview() {
+            if (!this.add_review.rating) {
+                errorMessage('Rating is required')
+                return
+            }
+            try {
+                this.showLoader();
+                await this.$http.postAuth(`${this.$http.apiUrl()}create-review`, {
+                    'to_user_id': this.add_review.editor_id,
+                    'job_image_id': this.add_review.image_job_id,
+                    'message': this.add_review.message,
+                    'rating': this.add_review.rating,
+                });
+            } catch (e) {
+                const message = e?.response?.data?.error?.message || 'ERROR';
+                errorMessage(message)
+            }
+            this.hideLoader();
+            this.clearAddReview();
+            this.reviewModal.hide();
+            await this.getProfileUser()
+        },
+        clearAddReview() {
+            this.add_review.rating = 0;
+            this.add_review.editor_id = null;
+            this.add_review.image_job_id = null;
+            this.add_review.message = '';
+        },
+        openReviewModal(job) {
+            this.add_review.editor_id = job?.user_work?.user_id || null
+            this.add_review.image_job_id = job.id
+            this.add_review.editor_name = job?.user_work?.user?.first_name || ''
+            this.reviewModal.show();
+        },
+        uploadFileChange(e) {
+            const tmpFiles = e.target.files
+            if (tmpFiles.length === 0) {
+                return false;
+            }
+            const file = tmpFiles[0]
+            this.upload_file.file = file
+        },
+        clearUploadFile() {
+            this.upload_file.file_name = '';
+            this.upload_file.file_name_valid = false
+            this.upload_file.file = null
+            this.upload_file.file_valid = false
+            this.$refs.fileupload.value = null;
+        },
+        async uploadFile() {
+            let error = false
+            if (!this.upload_file.file_name) {
+                this.upload_file.file_name_valid = 'This field is required'
+                error = true
+            }
+            if (!this.upload_file.file) {
+                this.upload_file.file_valid = 'This field is required'
+                error = true
+            }
+            if (error) {
+                return
+            }
+            try {
+                this.showLoader();
+                let data = new FormData();
+                data.append('file', this.upload_file.file);
+                data.append('file_name', this.upload_file.file_name);
+                await this.$http.postAuth(`${this.$http.apiUrl()}profile/upload-file`, data);
+                this.clearUploadFile();
+                await this.getProfileUser()
+            } catch (e) {
+                const message = e?.response?.data?.error?.message || 'ERROR';
+                errorMessage(message)
+            }
+            this.addFileModal.hide()
+            this.hideLoader();
+        },
+        openModalAddFile() {
+            this.addFileModal.show();
+        },
         async isQueryRouteParam() {
             let code = this.$route.query.code ?? null
             let shop = this.$route.query.shop ?? null
@@ -722,7 +1109,7 @@ export default {
                 this.errors.resolution_units = true
                 error = true
             }
-            if (!this.video_instructions) {
+            if (!this.style_guide.file_id_video_instructions) {
                 this.errors.video_instructions = true
                 error = true
             }
@@ -738,14 +1125,8 @@ export default {
             }
             try {
                 this.showLoader();
-                let data = new FormData();
-                data.append('uploaded_logo', this.uploaded_logo);
-                data.append('upload_watermark', this.upload_watermark);
-                data.append('video_instructions', this.video_instructions);
 
-                let body = JSON.stringify(this.style_guide);
-                data.append('body', body);
-                const response = await this.$http.postAuth(`${this.$http.apiUrl()}profile/add-style-guide`, data);
+                const response = await this.$http.postAuth(`${this.$http.apiUrl()}profile/add-style-guide`, this.style_guide);
                 this.clearForm();
                 this.add_style_guide = false;
                 this.add_style_guide_mob = false;
@@ -810,6 +1191,13 @@ export default {
                 this.select_work = val
             }
         },
+        selectFile(val) {
+            if (val == this.select_file) {
+                this.select_file = ''
+            } else {
+                this.select_file = val
+            }
+        },
         selectTab(val) {
             this.tab = val
         },
@@ -822,9 +1210,23 @@ export default {
         keypressSearchSampleWork() {
 
         },
+        keypressSearchFile(event) {
+            let search_text = (event.target.value).toUpperCase()
+            if (search_text && search_text.length > 1) {
+                this.search_file = this.user_files.filter(file => (file.file_name).toUpperCase().includes(search_text));
+            } else {
+                this.search_file = this.user_files
+            }
+        },
+        goPageFile(url) {
+            window.open(url, '_blank');
+        },
         addStyleGuide() {
             this.add_style_guide = !this.add_style_guide
             this.clearForm()
+        },
+        getAvatar(user) {
+            return user?.avatar?.url || null
         },
         async getProfileUser() {
             try {
@@ -834,6 +1236,9 @@ export default {
                 this.past_jobs = response?.data?.data?.past_job || {}
                 this.is_type_user = response?.data?.data?.user?.type_user || false
                 this.style_guides = response?.data?.data?.user?.style_guide || {}
+                this.user_files = response?.data?.data?.user?.user_files || {}
+                this.search_file = response?.data?.data?.user?.user_files || {}
+                this.editor_reviews = response?.data?.data?.user?.editor_reviews || {}
             } catch (e) {
                 const message = e?.response?.data?.error?.message || 'ERROR';
                 errorMessage(message)
@@ -859,9 +1264,9 @@ export default {
             this.style_guide.resolution_units = 'dpi';
             this.style_guide.other = '';
 
-            this.uploaded_logo = null
-            this.upload_watermark = null;
-            this.video_instructions = null;
+            this.style_guide.file_id_logo = ''
+            this.style_guide.file_id_watermark = '';
+            this.style_guide.file_id_video_instructions = '';
 
             this.errors.name = false;
             this.errors.remove_background = false;
@@ -911,7 +1316,7 @@ export default {
     text-overflow: ellipsis;
 }
 
-.img_div:hover {
+.img_div_editor:hover {
     .card-img-top {
         opacity: 0.3;
     }
@@ -919,9 +1324,15 @@ export default {
     .details_work_images {
         display: flex;
     }
-    .name_div.main_text{
+
+    .name_div.main_text {
         display: none;
     }
+}
+
+.modal-title {
+    width: 100%;
+    text-align: center;
 }
 
 .page_profile {
@@ -939,7 +1350,7 @@ export default {
 
 .page_header {
     display: flex;
-    gap: 45px;
+    gap: 3%;
 }
 
 .left_column {
@@ -1060,6 +1471,15 @@ export default {
     .count_message {
         color: red;
     }
+}
+
+.plus_icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    object-fit: cover;
 }
 
 ///////////Past job
@@ -1215,7 +1635,7 @@ $primary_font_family: 'Montserrat', sans-serif;
     height: 217px;
     overflow: hidden;
     border-radius: 5px;
-    margin-bottom: 12px;
+    margin-bottom: 6px;
     position: relative;
 
     img {
@@ -1393,7 +1813,7 @@ $primary_font_family: 'Montserrat', sans-serif;
 
 }
 
-.spw_item {
+.spw_item, .spw_item2 {
     background: #FFFFFF;
     box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.25);
     border-radius: 5px;
@@ -1416,6 +1836,9 @@ $primary_font_family: 'Montserrat', sans-serif;
 .box_sample_work_img_item {
     width: 158px;
     height: 151px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .img_item_w {
@@ -1801,6 +2224,9 @@ input::placeholder {
     .spw_item {
         margin-bottom: 105px;
     }
+    .margin_box_f {
+        margin-bottom: 105px;
+    }
     .box_images_work {
         margin-top: 21px;
     }
@@ -1848,23 +2274,44 @@ input::placeholder {
     height: 27px;
 }
 
-@media (max-width: 992px) {
-    .style_icon {
-        width: 17px;
-        height: 17px;
-    }
-    .featured-products {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    .with_watermark {
-        max-width: 205px;
-    }
-    .with_video_i {
-        max-width: 170px;
-    }
-    .with_logo {
-        max-width: 220px;
-    }
+.modal-footer {
+    border-top: none;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 30px;
+    gap: 35px;
+}
+
+.btn_modal_t1 {
+    border: 0.5px solid #494949;
+    box-sizing: border-box;
+    border-radius: 100px;
+    background: white;
+    height: 47px;
+    width: 148px;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #494949;
+}
+
+.btn_modal_t2 {
+    background: #D8C3AF;
+    border: 0.5px solid #494949;
+    box-sizing: border-box;
+    border-radius: 100px;
+    color: white;
+    height: 47px;
+    width: 148px;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .featured-product-item {
@@ -1882,5 +2329,187 @@ input::placeholder {
     object-fit: cover;
     background-size: cover;
     background-position: center;
+}
+
+#fileNameInput1:focus, #fileInput2:focus {
+    border-color: #cccccc;
+    box-shadow: none;
+}
+
+.file_type {
+    font-style: normal;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 21px;
+    letter-spacing: -0.02em;
+    color: #2555FF;
+}
+
+.box_file_n {
+    margin-left: 55px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.title_file_name {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 44px;
+    color: #494949;
+}
+
+.img_file {
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+.type_box_f {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 42px;
+    line-height: 44px;
+    color: #000000;
+    text-transform: uppercase;
+}
+
+.leave-review {
+    font-style: normal;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration-line: underline;
+    color: #494949;
+}
+
+.review_title {
+    padding: 25px 0;
+}
+
+.box_body {
+    background: #f4f5f5;
+    border-radius: 3px;
+    padding: 16px 30px;
+}
+
+.box_body textarea {
+    border: 0px;
+    resize: vertical;
+    width: 100%;
+    background: #f4f5f5;
+    margin-top: 15px;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 24px;
+    color: rgba(73, 73, 73, 0.65);
+}
+
+.rating_job {
+    display: flex;
+    justify-content: center;
+}
+
+.review_colum {
+    background: #FFFFFF;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    width: 52%;
+    margin-top: 43px;
+    padding: 27px 0 27px 32px;
+}
+
+.title_r {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 44px;
+    color: #494949;
+}
+
+.avatar {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border: 0.3px solid #494949;
+}
+
+.header_box_review {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.review_message {
+    font-style: italic;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 30px;
+    color: #494949;
+
+}
+
+.review_item {
+    padding-bottom: 20px;
+    border-bottom: 0.6px solid rgba(73, 73, 73, 0.65);
+}
+
+.review_items {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin-top: 80px;
+    height: 365px;
+    overflow: auto;
+    padding-right: 32px;
+}
+
+@media (max-width: 992px) {
+    .style_icon {
+        width: 17px;
+        height: 17px;
+    }
+    .featured-products {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .with_watermark {
+        max-width: 205px;
+    }
+    .with_video_i {
+        max-width: 170px;
+    }
+    .with_logo {
+        max-width: 220px;
+    }
+    .modal-footer {
+        border-top: none;
+        display: flex;
+        justify-content: center;
+        padding-bottom: 30px;
+        gap: 15px;
+    }
+    .box_file_n {
+        margin-left: 20px;
+    }
+    .type_box_f {
+        font-size: 25px;
+    }
+    .review_colum {
+        background: none;
+        width: 100%;
+        height: 530px;
+        padding-bottom: 90px;
+    }
+    .review_items {
+        margin-top: 20px;
+    }
 }
 </style>

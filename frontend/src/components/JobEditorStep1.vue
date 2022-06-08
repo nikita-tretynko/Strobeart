@@ -2,6 +2,12 @@
     <div class="section_page pb-60">
         <div class="title padding_t">Files</div>
         <div class="text pt-20 padding_t">The files are ready to be downloaded.</div>
+        <div class="d-flex justify-content-center mt-4">
+            <div class="btn_dsg" @click="downloadStyleGuides">
+                Download style guides
+                <img class="info_btn-dsg" src="@/assets/icons/info.svg" alt=""/>
+            </div>
+        </div>
         <div class="pt-110 pb_images images">
             <div class="img">
                 <img v-lazy=imageWorkPrev() alt=""/>
@@ -29,7 +35,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-body">
-                        Files have been downloaded. Timer will...
+                        Files have been downloaded. Timer will automatically start in 15 seconds
                     </div>
                 </div>
             </div>
@@ -59,6 +65,7 @@ export default {
             update_timer_start_work: null,
             start_timer: 0,
             timeModal: null,
+            style_guide_files:[]
         };
     },
     destroyed() {
@@ -86,6 +93,7 @@ export default {
     },
     mounted() {
         this.timeModal = new Modal(document.getElementById('timeModal'))
+        this.getUserStyleGuide()
     },
     computed: {
         getJobImages() {
@@ -103,10 +111,39 @@ export default {
             'showLoader',
             'hideLoader',
         ]),
+        async getUserStyleGuide() {
+            try {
+                this.showLoader();
+                const response = await this.$http.getAuth(`${this.$http.apiUrl()}profile/get-file-job/`+this.$route.params.id);
+                this.style_guide_files = response?.data?.data|| [];
+            } catch (e) {
+                const message = e?.response?.data?.error?.message || 'ERROR';
+                errorMessage(message)
+            }
+            this.hideLoader();
+        },
         handler: function handler(event) {
             if (this.getWorkJobTimer && this.start_timer) {
                 this.updateTimerWorkJob()
             }
+        },
+        downloadStyleGuides(){
+            this.style_guide_files.map(async element => {
+                if (element) {
+                    try {
+                        const response = await axios.get(element.file_url, {responseType: "blob"});
+                        const blob = new Blob([response.data], {type: response.data.type});
+                        const link = document.createElement("a");
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = element.file_name;
+                        link.click();
+                        window.URL.revokeObjectURL(link.href);
+                    } catch (e) {
+                        const message = e?.response?.data?.error?.message || 'ERROR';
+                        errorMessage(message)
+                    }
+                }
+            })
         },
         async updateTimerWorkJob() {
             try {
@@ -133,7 +170,6 @@ export default {
                 const response = await this.$http.postAuth(`${this.$http.apiUrl()}create-work-image`, {
                     work_job: this.work_job.id,
                     number_file: this.index_img,
-                //    image_id: this.getJobImages[this.index_img]?.id || null,
                     image_id: this.image?.id || null,
                     image_jobs_id: this.job.id
                 });
@@ -352,6 +388,29 @@ export default {
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.25);
     border-radius: 100px;
     color: #FFFFFF;
+}
+.btn_dsg{
+    cursor: pointer;
+    height: 60px;
+    width: 239px;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 17px;
+    display: flex;
+    align-items: center;
+   justify-content: center;
+    color: #494949;
+    background: #FFFFFF;
+    border: 0.5px solid #494949;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.25);
+    border-radius: 100px;
+    position: relative;
+}
+.info_btn-dsg{
+    position: absolute;
+    right: 17px;
+    top: 9px;
 }
 
 @media only screen and (max-width: 992px) {

@@ -111,6 +111,7 @@ export default {
             amount: '',
             card_id:null,
             last4:null,
+            data_user:this.user,
         };
     },
     destroyed() {
@@ -131,10 +132,10 @@ export default {
             return this.user_card_n?.last4 || null
         },
         is_money_transfers() {
-            return this.user?.money_transfers_done.length || null
+            return this.data_user?.money_transfers_done.length || null
         },
         money_transfers() {
-            return this.user?.money_transfers_done || null
+            return this.data_user?.money_transfers_done || null
         }
     },
     methods: {
@@ -164,6 +165,7 @@ export default {
                         card_id: this.card_id
                     });
                     this.userCardModal.hide();
+                    this.data_user = resp?.data?.data || {}
                     // window.location = resp?.data?.data?.url;
                 } catch (e) {
                     if (e?.response?.data?.error?.message) {
@@ -208,14 +210,14 @@ export default {
             return item?.payment_images?.length || 0
         },
         getPendingBalance() {
-            if (this.user?.balance['pending']) {
-                return '$' + (this.user.balance['pending'] / 100).toFixed(2);
+            if (this.data_user?.balance['pending']) {
+                return '$' + (this.data_user.balance['pending'] / 100).toFixed(2);
             }
             return '$0'
         },
         getAvailableBalance() {
-            if (this.user?.balance['available']) {
-                return '$' + (this.user.balance['available'] / 100).toFixed(2);
+            if (this.data_user?.balance['available']) {
+                return '$' + (this.data_user.balance['available'] / 100).toFixed(2);
             }
             return '$0'
         },
@@ -408,6 +410,9 @@ export default {
 }
 
 .btn_withdrawal {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 18px;
     width: 148px;
     height: 47px;
     color: white;

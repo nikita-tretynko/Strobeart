@@ -40,6 +40,9 @@ class ImageJob extends Model
         'red_eye',
         'due_date',
         'status',
+        'color_palette',
+        'typography',
+        'file_id_video_instruction',
     ];
 
     /**
@@ -48,8 +51,6 @@ class ImageJob extends Model
      * @var array
      */
     protected $casts = [
-        'add_logo' => 'boolean',
-        'add_watermark' => 'boolean',
         'white_background' => 'boolean',
         'red_eye' => 'boolean',
         'created_at' => 'datetime',
@@ -83,13 +84,13 @@ class ImageJob extends Model
 
     public function images_decline(): HasMany
     {
-        return $this->hasMany(Image::class)->where('decline','!=',0);
+        return $this->hasMany(Image::class)->where('decline', '!=', 0);
     }
 
     /**
      * Prepare a date
      *
-     * @param  DateTimeInterface  $date
+     * @param DateTimeInterface $date
      * @return string
      */
     protected function serializeDate(DateTimeInterface $date): string
@@ -100,6 +101,51 @@ class ImageJob extends Model
     public function finished_worked_images(): HasMany
     {
         return $this->hasMany(WorkedImage::class, 'image_jobs_id', 'id')
-            ->where('status',WorkJobStatusEnum::$FINISHED);
+            ->where('status', WorkJobStatusEnum::$FINISHED);
+    }
+
+    public function review(): HasOne
+    {
+        return $this->hasOne(Review::class, 'job_image_id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function file_logo(): BelongsTo
+    {
+        return $this->belongsTo(UserFile::class,'add_logo', 'id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function file_watermark(): BelongsTo
+    {
+        return $this->belongsTo(UserFile::class,'add_watermark', 'id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function file_video_instructions(): BelongsTo
+    {
+        return $this->belongsTo(UserFile::class,'file_id_video_instruction', 'id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function file_color_palette(): BelongsTo
+    {
+        return $this->belongsTo(UserFile::class,'color_palette', 'id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function file_typography(): BelongsTo
+    {
+        return $this->belongsTo(UserFile::class,'typography', 'id');
     }
 }

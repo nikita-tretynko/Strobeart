@@ -76,13 +76,17 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     Route::get('is-instagram-connect', [UserController::class, 'isInstagramConnect']);
 
     Route::get('past-job', [JobController::class, 'pastJob']);
+    Route::post('create-review', [UserController::class, 'createReview']);
 
 
     Route::group(['prefix' => 'profile'], function () {
         Route::get('/user', [UserController::class, 'getUserProfile']);
+        Route::post('/upload-file', [ProfileController::class, 'uploadUserFile']);
         Route::post('/add_payment_method', [ProfileController::class, 'addPaymentMethod']);
         Route::post('/add-style-guide', [ProfileController::class, 'addStyleGuide']);
         Route::get('/get-style_guide', [ProfileController::class, 'getStyleGuide']);
+        Route::get('/get-file-job/{job_id}', [ProfileController::class, 'getFileJob']);
+        Route::get('/get-styles-job', [ProfileController::class, 'getStyleJob']);
         Route::get('/setting', [ProfileController::class, 'setting']);
         Route::post('/update-avatar', [ProfileController::class, 'updateAvatar']);
         Route::post('/update-user_name', [ProfileController::class, 'updateUserName']);

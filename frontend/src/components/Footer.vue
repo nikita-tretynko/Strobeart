@@ -36,8 +36,9 @@
             </div>
         </div>
         <div v-if="this.isLogged&&isTypeUser" class="footer_mobile">
-            <router-link :to="{ name: 'Messages' }">
-                <img class="mr-16" src="@/assets/icons/mail-m.svg" alt="icon-approved.svg"/>
+            <router-link :to="{ name: 'ChatsList' }">
+                <img v-if="$route.name==='ChatsList'" class="mr-16" src="@/assets/icons/mail-mob_1.svg" alt="icon-approved.svg"/>
+                <img v-else class="mr-16" src="@/assets/icons/mail-m.svg" alt="icon-approved.svg"/>
             </router-link>
             <router-link :to="{ name: 'PastJobs' }">
 <!--                <img v-if="isTypeUser==='business'" class="mr-16" src="@/assets/icons/ic_round-add-a-photo.svg"-->

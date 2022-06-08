@@ -18,6 +18,7 @@ class PublishingFilesRequest extends ApiRequest
         return [
             'image_jobs_id' => ['required'],
             'description' => ['required'],
+            'alt_text' => ['nullable'],
             'password_instagram' => ['nullable'],
             'login_instagram' => ['nullable'],
             'sequence_pictures' => ['nullable'],

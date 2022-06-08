@@ -18,6 +18,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use function Symfony\Component\Translation\t;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -220,5 +221,21 @@ class User extends Authenticatable implements JWTSubject
     public function shopify_connect(): HasOne
     {
         return $this->hasOne(ShopifyConnects::class, 'user_id', 'id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function user_files(): HasMany
+    {
+        return $this->hasMany(UserFile::class,'user_id', 'id')->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function editor_reviews():HasMany
+    {
+        return $this->hasMany(Review::class,'to_user_id','id');
     }
 }

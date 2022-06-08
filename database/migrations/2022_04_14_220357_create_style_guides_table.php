@@ -26,9 +26,11 @@ class CreateStyleGuidesTable extends Migration
             $table->string('resolution')->nullable()->default(null);
             $table->string('resolution_units')->nullable()->default(null);
             $table->string('other')->nullable()->default(null);
-            $table->string('uploaded_logo')->nullable()->default(null);
-            $table->string('upload_watermark')->nullable()->default(null);
-            $table->string('video_instructions')->nullable()->default(null);
+            $table->bigInteger('file_id_logo')->nullable()->default(null);
+            $table->bigInteger('file_id_watermark')->nullable()->default(null);
+            $table->bigInteger('file_id_video_instructions')->nullable()->default(null);
+            $table->bigInteger('file_id_color_palette')->nullable()->default(null);
+            $table->bigInteger('file_id_video_typography')->nullable()->default(null);
             $table->timestamps();
         });
     }

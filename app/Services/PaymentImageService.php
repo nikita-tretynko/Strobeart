@@ -54,15 +54,15 @@ class PaymentImageService
                 $worked_images = WorkedImage::where('image_jobs_id', $image_jobs_id)
                     ->where('image_id', $image->image_job->id)
                     ->where('status', WorkedImagesStatusEnum::$DECLINED)->first();
-                if ($worked_images->add_time || ($timer > 900)) {
-                    switch ($timer) {
-                        case ($timer > 0 && $timer <= 300):
+                if ($worked_images->add_time || ($worked_images->timer > 900)) {
+                    switch ($worked_images->timer) {
+                        case ($worked_images->timer  > 0 && $worked_images->timer  <= 1200):
                             $amount = $price_for_one_image * (45 / 100);
                             break;
-                        case ($timer > 300 && $timer <= 600):
+                        case ($worked_images->timer  > 1200 && $worked_images->timer  <= 1500):
                             $amount = $price_for_one_image * (25 / 100);
                             break;
-                        case ($timer > 600):
+                        case ($worked_images->timer > 1500):
                             $amount = $price_for_one_image * (5 / 100);
                             break;
                     }

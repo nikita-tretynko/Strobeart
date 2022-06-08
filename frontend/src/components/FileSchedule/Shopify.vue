@@ -74,24 +74,24 @@
                                     </draggable>
                                 </div>
                             </div>
-                            <div class="box_select">
-                                <div class="select_calendar" @click="selectSaleChannel">
-                                    <div class="title_s">
-                                        Sale Channel
-                                    </div>
-                                    <div class="col-2 text-end">
-                                        <svg width="21" height="21" viewBox="0 0 21 21" fill="none"
-                                             xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M18.8528 6.94727C18.6066 6.70121 18.2729 6.56299 17.9248 6.56299C17.5768 6.56299 17.243 6.70121 16.9969 6.94727L10.5 13.4441L4.00315 6.94727C3.75561 6.70819 3.42407 6.5759 3.07994 6.57889C2.73581 6.58188 2.40661 6.71991 2.16327 6.96326C1.91992 7.20661 1.78189 7.5358 1.7789 7.87993C1.77591 8.22406 1.9082 8.5556 2.14728 8.80314L9.57209 16.228C9.81822 16.474 10.152 16.6122 10.5 16.6122C10.8481 16.6122 11.1818 16.474 11.428 16.228L18.8528 8.80314C19.0988 8.55701 19.2371 8.22324 19.2371 7.87521C19.2371 7.52718 19.0988 7.1934 18.8528 6.94727Z"
-                                                fill="#494949"/>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div v-if="select_sale_channel" class="calendar_box">
+<!--                            <div class="box_select">-->
+<!--                                <div class="select_calendar" @click="selectSaleChannel">-->
+<!--                                    <div class="title_s">-->
+<!--                                        Sale Channel-->
+<!--                                    </div>-->
+<!--                                    <div class="col-2 text-end">-->
+<!--                                        <svg width="21" height="21" viewBox="0 0 21 21" fill="none"-->
+<!--                                             xmlns="http://www.w3.org/2000/svg">-->
+<!--                                            <path-->
+<!--                                                d="M18.8528 6.94727C18.6066 6.70121 18.2729 6.56299 17.9248 6.56299C17.5768 6.56299 17.243 6.70121 16.9969 6.94727L10.5 13.4441L4.00315 6.94727C3.75561 6.70819 3.42407 6.5759 3.07994 6.57889C2.73581 6.58188 2.40661 6.71991 2.16327 6.96326C1.91992 7.20661 1.78189 7.5358 1.7789 7.87993C1.77591 8.22406 1.9082 8.5556 2.14728 8.80314L9.57209 16.228C9.81822 16.474 10.152 16.6122 10.5 16.6122C10.8481 16.6122 11.1818 16.474 11.428 16.228L18.8528 8.80314C19.0988 8.55701 19.2371 8.22324 19.2371 7.87521C19.2371 7.52718 19.0988 7.1934 18.8528 6.94727Z"-->
+<!--                                                fill="#494949"/>-->
+<!--                                        </svg>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                                <div v-if="select_sale_channel" class="calendar_box">-->
 
-                                </div>
-                            </div>
+<!--                                </div>-->
+<!--                            </div>-->
                             <div class="box_select">
                                 <div class="select_calendar" @click="selectCalendar">
                                     <div class="title_s">
@@ -170,8 +170,11 @@
                             <div class="prod_info_item">SKU {{ prod.variants[0].sku }}</div>
                             <div class="prod_info_item">ID {{ prod.id }}</div>
                         </div>
-                        <div class="box_add_p" v-if="added_prod&&added_prod['id']!==prod['id']">
-                            <button class="btn_add_prod"  @click="addProd(prod)">Add</button>
+                        <div class="box_add_p" v-if="(added_prod&&added_prod['id']==prod['id'])">
+                            <button class="btn_added_prod" @click="addProd(prod)">Added </button>
+                        </div>
+                        <div v-else class="box_add_p">
+                            <button class="btn_add_prod" @click="addProd(prod)">Add </button>
                         </div>
                     </div>
                 </div>
@@ -200,24 +203,24 @@
                     </draggable>
                 </div>
             </div>
-            <div class="box_select">
-                <div class="select_calendar" @click="selectSaleChannel">
-                    <div class="title_s">
-                        Sale Channel
-                    </div>
-                    <div class="col-2 text-end">
-                        <svg width="21" height="21" viewBox="0 0 21 21" fill="none"
-                             xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M18.8528 6.94727C18.6066 6.70121 18.2729 6.56299 17.9248 6.56299C17.5768 6.56299 17.243 6.70121 16.9969 6.94727L10.5 13.4441L4.00315 6.94727C3.75561 6.70819 3.42407 6.5759 3.07994 6.57889C2.73581 6.58188 2.40661 6.71991 2.16327 6.96326C1.91992 7.20661 1.78189 7.5358 1.7789 7.87993C1.77591 8.22406 1.9082 8.5556 2.14728 8.80314L9.57209 16.228C9.81822 16.474 10.152 16.6122 10.5 16.6122C10.8481 16.6122 11.1818 16.474 11.428 16.228L18.8528 8.80314C19.0988 8.55701 19.2371 8.22324 19.2371 7.87521C19.2371 7.52718 19.0988 7.1934 18.8528 6.94727Z"
-                                fill="#494949"/>
-                        </svg>
-                    </div>
-                </div>
-                <div v-if="select_sale_channel" class="calendar_box">
+<!--            <div class="box_select">-->
+<!--                <div class="select_calendar" @click="selectSaleChannel">-->
+<!--                    <div class="title_s">-->
+<!--                        Sale Channel-->
+<!--                    </div>-->
+<!--                    <div class="col-2 text-end">-->
+<!--                        <svg width="21" height="21" viewBox="0 0 21 21" fill="none"-->
+<!--                             xmlns="http://www.w3.org/2000/svg">-->
+<!--                            <path-->
+<!--                                d="M18.8528 6.94727C18.6066 6.70121 18.2729 6.56299 17.9248 6.56299C17.5768 6.56299 17.243 6.70121 16.9969 6.94727L10.5 13.4441L4.00315 6.94727C3.75561 6.70819 3.42407 6.5759 3.07994 6.57889C2.73581 6.58188 2.40661 6.71991 2.16327 6.96326C1.91992 7.20661 1.78189 7.5358 1.7789 7.87993C1.77591 8.22406 1.9082 8.5556 2.14728 8.80314L9.57209 16.228C9.81822 16.474 10.152 16.6122 10.5 16.6122C10.8481 16.6122 11.1818 16.474 11.428 16.228L18.8528 8.80314C19.0988 8.55701 19.2371 8.22324 19.2371 7.87521C19.2371 7.52718 19.0988 7.1934 18.8528 6.94727Z"-->
+<!--                                fill="#494949"/>-->
+<!--                        </svg>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div v-if="select_sale_channel" class="calendar_box">-->
 
-                </div>
-            </div>
+<!--                </div>-->
+<!--            </div>-->
             <div class="box_select">
                 <div class="select_calendar" @click="selectCalendar">
                     <div class="title_s">
@@ -536,6 +539,7 @@ export default {
                     date_publication: date,
                     sequence_pictures:id_images??[],
                     description: this.description,
+                    alt_text:this.alt_text,
                     platform: this.platform,
                     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                     api_key: this.api_key,

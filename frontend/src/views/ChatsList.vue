@@ -133,6 +133,7 @@ export default {
     border: 0.3px solid #494949;
     box-sizing: border-box;
     margin-bottom: 6px;
+    object-fit: cover;
 }
 .channel_item{
     display: flex;

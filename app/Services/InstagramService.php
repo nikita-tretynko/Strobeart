@@ -34,10 +34,19 @@ class InstagramService
         }
         Log::info('TOKEN: ' . json_encode($date_token));
         $accounts_facebook = $this->getPageAccountsFacebook($token);
+        if (!$accounts_facebook) {
+            throw new ApiValidationException('Error Facebook "No accounts"');
+        }
         Log::info('accounts_facebook: ' . json_encode($accounts_facebook));
         $id_account = $this->getFirstPageIdAccountFacebook($accounts_facebook);
+        if (!$id_account) {
+            throw new ApiValidationException('Error Facebook "No id accounts"');
+        }
         Log::info('$id_account: ' . json_encode($id_account));
         $instagram_business_account_id = $this->getPageInstagramBusinessAccount($token, $id_account);
+        if (!$instagram_business_account_id) {
+            throw new ApiValidationException('Error: "no instagram business account"');
+        }
         Log::info('$instagram_business_account_id: ' . json_encode($instagram_business_account_id));
         return $this->instagramConnectsService->updateOrCreateInstagramConnects($date_token, $user, $instagram_business_account_id);
     }

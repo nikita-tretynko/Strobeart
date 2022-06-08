@@ -59,7 +59,6 @@ class FinishedUserPlanJob implements ShouldQueue
                 $amount = UserPlan::gepPricePlan()[$this->user_plan->plan];
                 $payment_intent = $this->stripeService->paymentIntents($user, $amount, 'Payment MEMBERSHIP');
                 $payment = $this->stripeService->confirmPaymentIntents($payment_intent->id, $user);
-                $data['plan'] = $this->user_plan->plan;
                 $this->paymentService->createPayment($payment, $user,$amount, PaymentTypeEnum::$MEMBERSHIP);
                 $this->planService->create($user, $this->user_plan->plan, $date);
             } catch (\Exception $exception) {

@@ -24,6 +24,7 @@ use App\Services\SocialiteUserService;
 use App\Traits\DateTimeTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PublishingFilesController extends Controller
 {
@@ -72,29 +73,32 @@ class PublishingFilesController extends Controller
         $data['user_id'] = $user->id;
         $data['date_publication'] = $this->setTimezoneDateTime($data['date_publication'], $data['timezone']);
 
-
         $time = Carbon::parse($this->getIsoDateTime(new Carbon()));
         $time_from_publish = Carbon::parse($data['date_publication']);
         $start_published = $time->diffInSeconds($time_from_publish);
+        if ($time > $time_from_publish) {
+            return new ApiErrorResponse('The date publication is not a valid date.');
+        }
 
         switch ($data['platform']) {
             case 'instagram':
                 $connect_instagram = InstagramConnects::where('user_id', $user->id)->first();
-                $photos = WorkedImage::where('image_jobs_id', $image_job)
+                $photos = WorkedImage::where('image_jobs_id', $image_job->id)
                     ->where('status', WorkedImagesStatusEnum::$FINISHED)->get();
                 $data['count_posts'] = count(array_chunk($photos->toArray(), 10));
+                Log::info('!!!count_posts: '.$data['count_posts']);
                 $date_publication = Carbon::parse($data['date_publication'])->format('d');
-                $count_posts = PublishingFiles::where('user_id',$user->id)->whereDay('date_publication', $date_publication)->sum('count_posts');
-                if (($count_posts + $data['count_posts']) > 25){
+                $count_posts = PublishingFiles::where('user_id', $user->id)->whereDay('date_publication', $date_publication)->sum('count_posts');
+                if (($count_posts + $data['count_posts']) > 25) {
                     return new ApiErrorResponse("Can't create more than 25 image-posts per day. Please schedule on another day.");
                 }
                 $publishing = PublishingFiles::create($data);
-                PublishingImagesInstagramJob::dispatch($photos,$publishing, $connect_instagram)->delay(Carbon::now()->addSeconds($start_published));
+                PublishingImagesInstagramJob::dispatch($photos, $publishing, $connect_instagram)->delay(Carbon::now()->addSeconds($start_published));
                 break;
             case 'shopify':
                 $shopify_login['shop'] = $data['shop'];
                 $publishing = PublishingFiles::create($data);
-                PublishingImagesShopifyJob::dispatch($user, $publishing, $shopify_login, $data['product_id'])->delay(Carbon::now()->addSeconds($start_published));
+                PublishingImagesShopifyJob::dispatch($user, $publishing, $shopify_login, $data['product_id'],$data['description'],$data['alt_text'])->delay(Carbon::now()->addSeconds($start_published));
                 break;
         }
 

@@ -408,11 +408,14 @@ export default {
                 file_format: '',
                 other: '',
                 checked_option: {
-                    add_logo: false,
-                    add_watermark: false,
                     white_background: false,
                     red_eye: false,
                 },
+                file_id_color_palette:'',
+                file_id_typography:'',
+                add_logo: '',
+                add_watermark: '',
+                file_id_video_instruction:'',
             },
             dates: {
                 due_date: null,
@@ -549,10 +552,14 @@ export default {
                     color_profile: this.requirements.color_profile,
                     file_format: this.requirements.file_format,
                     other: this.requirements.other,
-                    add_logo: this.requirements.checked_option.add_logo,
-                    add_watermark: this.requirements.checked_option.add_watermark,
+                    add_logo: this.requirements.add_logo,
+                    add_watermark: this.requirements.add_watermark,
+                    file_id_video_instruction: this.requirements.file_id_video_instruction,
                     white_background: this.requirements.checked_option.white_background,
                     red_eye: this.requirements.checked_option.red_eye,
+                    color_palette:this.requirements.color_palette,
+                    typography:this.requirements.typography,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 });
                 data.append('body', body);
                 const result = await this.$http.postAuth(`${this.$http.apiUrl()}create_new_job`, data);

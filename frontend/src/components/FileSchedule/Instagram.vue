@@ -229,6 +229,11 @@
                 </div>
             </div>
             <div class="box_form2">
+<!--                <div class="box_form2_item">-->
+<!--                    <div class="text_st1 w_text">Add alt text</div>-->
+<!--                    <input v-model="alt_text" autocomplete="off" type="text" class="input_text_stile"-->
+<!--                           placeholder="ex: Front Facing Baby Onesie...">-->
+<!--                </div>-->
                 <div class="box_form2_item">
                     <div class="text_st1 w_text">Add Hashtags</div>
                     <input v-model="hashtags" autocomplete="off" type="text" class="input_text_stile"
@@ -387,6 +392,7 @@ export default {
         ]),
        async publishImages(){
             await this.publish()
+           this.modalImagePosted.hide()
         },
         isEmptyObject(obj) {
             if (obj) {
@@ -497,6 +503,7 @@ export default {
                     image_jobs_id: this.job_id,
                     date_publication: date,
                     hashtags: this.hashtags,
+                    alt_text: this.alt_text,
                     description: this.description,
                     platform: this.platform,
                     sequence_pictures: id_images ?? [],

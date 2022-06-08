@@ -17,10 +17,12 @@
                             :class="{ 'is-invalid': errors.editing_level }"
                             required>
                             <option selected disabled hidden value="">simple, intermediate...</option>
-                            <option v-for="(level, index) in editing_levels" :key="'editing-level-' + index">{{level}}</option>
+                            <option v-for="(level, index) in editing_levels" :key="'editing-level-' + index">
+                                {{ level }}
+                            </option>
                         </select>
                         <div id="editingLevelFeedback" class="invalid-feedback">
-                            Please choose a editing level.
+                            Please choose editing level.
                         </div>
                     </div>
                 </div>
@@ -28,17 +30,10 @@
                 <div class="row input_lines align-items-center">
                     <div class="col-6 main_text label_title">
                         Style Guide
-<!--                        <span class="red_color star">*</span>-->
+                        <!--                        <span class="red_color star">*</span>-->
                     </div>
 
                     <div class="col-6 required_select">
-<!--                        <input id="styleGuide"-->
-<!--                               type="text"-->
-<!--                               class="input_text_stile"-->
-<!--                               @click="dropError"-->
-<!--                               placeholder="Please choose an style guide."-->
-<!--                               v-model="requirements.style_guide"-->
-<!--                               >-->
                         <select
                             class="form-select"
                             @click="dropError"
@@ -46,7 +41,9 @@
                             id="styleGuide"
                             @change="selectedStyleGuide">
                             <option selected disabled value="">jeans, lifestyle, social...</option>
-                            <option v-for="(style, index) in style_guides" :value="style" :key="index">{{style.name}}</option>
+                            <option v-for="(style, index) in style_guides" :value="style" :key="index">
+                                {{ style.name }}
+                            </option>
                         </select>
                     </div>
                 </div>
@@ -66,7 +63,9 @@
                             :class="{ 'is-invalid': errors.color_profile }"
                             required>
                             <option selected disabled hidden value="">RBG, CMYK, ICC...</option>
-                            <option v-for="(color_prof, index) in color_profiles" :key="'color-profile-' + index">{{color_prof}}</option>
+                            <option v-for="(color_prof, index) in color_profiles" :key="'color-profile-' + index">
+                                {{ color_prof }}
+                            </option>
                         </select>
                         <div id="colorProfileFeedback" class="invalid-feedback">
                             Please choose a color profile.
@@ -89,7 +88,9 @@
                             :class="{ 'is-invalid': errors.file_format }"
                             required>
                             <option selected disabled hidden value="">PNG, JPEG, TIFF...</option>
-                            <option v-for="(format, index) in file_formats" :key="'color-profile-' + index">{{format}}</option>
+                            <option v-for="(format, index) in file_formats" :key="'color-profile-' + index">
+                                {{ format }}
+                            </option>
                         </select>
                         <div id="fileFormatFeedback" class="invalid-feedback">
                             Please choose a file format.
@@ -116,10 +117,16 @@
                     <div class="col-6 main_text label_title">
                         Add Logo
                     </div>
-                    <div class="col-6 section_checkbox">
-                        <div class="input_checkbox cp" @click="checkedItem('add_logo')">
-                            <div class="checked_icon" v-if="requirements.checked_option.add_logo">&#10004;</div>
-                        </div>
+                    <div class="col-6 required_select">
+                        <select
+                            class="form-select"
+                            v-model="requirements.add_logo"
+                        >
+                            <option selected disabled value="">Logo</option>
+                            <option v-for="(file, index) in user_files" :value="file.id" :key="index">
+                                {{ file.file_name }}
+                            </option>
+                        </select>
                     </div>
                 </div>
 
@@ -127,14 +134,67 @@
                     <div class="col-6 main_text label_title">
                         Add Watermark/s
                     </div>
-
-                    <div class="col-6 section_checkbox">
-                        <div class="input_checkbox cp" @click="checkedItem('add_watermark')">
-                            <div class="checked_icon" v-if="requirements.checked_option.add_watermark">&#10004;</div>
-                        </div>
+                    <div class="col-6 required_select">
+                        <select
+                            class="form-select"
+                            v-model="requirements.add_watermark"
+                             >
+                            <option selected disabled value="">Watermark</option>
+                            <option v-for="(file, index) in user_files" :value="file.id" :key="index">
+                                {{ file.file_name }}
+                            </option>
+                        </select>
                     </div>
                 </div>
 
+                <div class="row input_lines align-items-center">
+                    <div class="col-6 main_text label_title">
+                        Video instruction
+                    </div>
+                    <div class="col-6 required_select">
+                        <select
+                            class="form-select"
+                            v-model="requirements.file_id_video_instruction"
+                        >
+                            <option selected disabled value="">Video instruction</option>
+                            <option v-for="(file, index) in user_files" :value="file.id" :key="index">
+                                {{ file.file_name }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row input_lines align-items-center">
+                    <div class="col-6 main_text label_title">
+                        Color palette
+                    </div>
+                    <div class="col-6 required_select">
+                        <select
+                            class="form-select"
+                            v-model="requirements.file_id_color_palette"
+                        >
+                            <option selected disabled value=""> Color palette</option>
+                            <option v-for="(file, index) in user_files" :value="file.id" :key="index">
+                                {{ file.file_name }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row input_lines align-items-center">
+                    <div class="col-6 main_text label_title">
+                        Typography
+                    </div>
+                    <div class="col-6 required_select">
+                        <select
+                            class="form-select"
+                            v-model="requirements.file_id_typography"
+                        >
+                            <option selected disabled value="">Typography</option>
+                            <option v-for="(file, index) in user_files" :value="file.id" :key="index">
+                                {{ file.file_name }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
                 <div class="row input_lines align-items-center">
                     <div class="col-6 main_text label_title">
                         White Background
@@ -198,8 +258,7 @@ import {mapMutations} from "vuex";
 
 export default {
     name: 'AddRequirements',
-    components: {
-    },
+    components: {},
     props: [
         'requirements',
         'validated_array',
@@ -216,6 +275,7 @@ export default {
                 'Advanced',
             ],
             style_guides: [],
+            user_files: [],
             color_profiles: [
                 'RGB',
                 'CMYK',
@@ -230,8 +290,8 @@ export default {
             ],
         }
     },
-   async mounted() {
-      await  this.getUserStyleGuide()
+    async mounted() {
+        await this.getUserStyleGuide()
     },
     created() {
         window.addEventListener('resize', this.updateWidth);
@@ -246,22 +306,24 @@ export default {
             'hideLoader',
             'setUser',
         ]),
-        selectedStyleGuide(event){
+        selectedStyleGuide(event) {
             console.log(event.target)
-            this.requirements.color_profile = this.requirements?.style_guide?.color_profile||''
-            this.requirements.file_format = this.requirements?.style_guide?.file_format||''
-            this.requirements.other = this.requirements?.style_guide?.other||''
-            this.requirements.checked_option.add_logo = this.requirements?.style_guide?.uploaded_logo?true:false
-            this.requirements.checked_option.white_background = this.requirements?.style_guide?.remove_background=='Yes'?true:false
-            this.requirements.checked_option.add_watermark = this.requirements?.style_guide?.upload_watermark?true:false
-
-            console.log(this.requirements.style_guide)
+            this.requirements.color_profile = this.requirements?.style_guide?.color_profile || ''
+            this.requirements.file_format = this.requirements?.style_guide?.file_format || ''
+            this.requirements.other = this.requirements?.style_guide?.other || ''
+            this.requirements.add_logo = this.requirements?.style_guide?.file_id_logo ||''
+            this.requirements.checked_option.white_background = this.requirements?.style_guide?.remove_background == 'Yes' ? true : false
+            this.requirements.add_watermark = this.requirements?.style_guide?.file_id_watermark ||''
+            this.requirements.file_id_video_instruction = this.requirements?.style_guide?.file_id_video_instructions ||''
+            this.requirements.file_id_color_palette = this.requirements?.style_guide?.file_id_color_palette ||''
+            this.requirements.file_id_typography = this.requirements?.style_guide?.file_id_typography ||''
         },
-       async getUserStyleGuide(){
+        async getUserStyleGuide() {
             try {
                 this.showLoader();
-                const response = await this.$http.getAuth(`${this.$http.apiUrl()}profile/get-style_guide`);
-                this.style_guides = response?.data?.data||[];
+                const response = await this.$http.getAuth(`${this.$http.apiUrl()}profile/get-styles-job`);
+                this.style_guides = response?.data?.data?.style_guides || [];
+                this.user_files = response?.data?.data?.user_files || [];
             } catch (e) {
                 const message = e?.response?.data?.error?.message || 'ERROR';
                 errorMessage(message)
@@ -285,7 +347,7 @@ export default {
                     this.errors[this.validated_array[i]] = true;
                 }
             }
-            if (!this.validated){
+            if (!this.validated) {
                 return;
             }
             this.$emit('next-tab');
@@ -297,8 +359,7 @@ export default {
             this.validated = true;
         },
     },
-    computed: {
-    },
+    computed: {},
     watch: {
         sizeW(val) {
             this.window_desktop = val > 992;
@@ -309,56 +370,66 @@ export default {
 
 <style lang="scss" scoped>
 $primary_font_family: 'Montserrat', sans-serif;
-.section_checkbox,.checked_icon{
+.section_checkbox, .checked_icon {
     display: flex;
     justify-content: center;
 }
+
 .form-select {
     border-radius: 19px;
-    color: rgba(74,74,74, 0.6);
-    border-color: rgba(74,74,74, 0.6);
+    color: rgba(74, 74, 74, 0.6);
+    border-color: rgba(74, 74, 74, 0.6);
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 .form-select:focus {
-    border-color: rgba(74,74,74, 0.6);
+    border-color: rgba(74, 74, 74, 0.6);
 }
+
 .main_text {
     color: #494949;
     font-style: normal;
     font-family: $primary_font_family;
 }
+
 .white_text {
     color: #FFFFFF;
     font-style: normal;
     font-family: $primary_font_family;
 }
+
 .title_desktop {
     font-weight: 600;
     font-size: 35px;
     line-height: 44px;
 }
+
 .description_desktop {
     font-weight: normal;
     font-size: 17px;
     line-height: 24px;
 }
+
 .description_mobile {
     font-weight: 500;
     font-size: 12.5px;
     line-height: 20px;
 }
+
 .item_body {
     width: 100%;
     min-height: 340px;
     padding: 11px;
 }
+
 .label_title {
     font-weight: normal;
     font-size: 13px;
     line-height: 18px;
     padding-top: 5px;
 }
+
 .input_text_stile {
     width: 100%;
     height: 38px;
@@ -373,6 +444,7 @@ $primary_font_family: 'Montserrat', sans-serif;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 .input_style {
     width: 100%;
     height: 30px;
@@ -388,6 +460,7 @@ $primary_font_family: 'Montserrat', sans-serif;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 .input_checkbox {
     width: 22px;
     height: 22px;
@@ -396,9 +469,11 @@ $primary_font_family: 'Montserrat', sans-serif;
     filter: opacity(0.35);
     padding: 0 0 2px;
 }
+
 .input_lines {
     margin: 14px 0;
 }
+
 .custom_button {
     width: 200px;
     height: 60px;
@@ -407,15 +482,19 @@ $primary_font_family: 'Montserrat', sans-serif;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.25);
     border-radius: 100px;
 }
+
 .braun_background {
     background: #D8C3AF;
 }
+
 .disabled_button {
     opacity: 0.45;
 }
+
 .required_select {
     position: relative;
 }
+
 .error_message {
     position: absolute;
     top: -58px;
@@ -432,21 +511,27 @@ $primary_font_family: 'Montserrat', sans-serif;
     line-height: 17px;
     padding: 19px;
 }
+
 .red_color {
     color: #bb2d3b;
 }
+
 .white_background {
     background: #FFFFFF;
 }
+
 .m_t_44 {
     margin-top: 44px;
 }
+
 .m_t_60 {
     margin-top: 60px;
 }
+
 .m_b_126 {
     margin-bottom: 126px;
 }
+
 .is-invalid {
     border: 1px solid #bb2d3b !important;
 }

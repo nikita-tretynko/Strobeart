@@ -12,8 +12,19 @@ class UserWorkJob extends Model
 
     protected $fillable = ['image_jobs_id','user_id','status','timer','add_time'];
 
+    /**
+     * @return BelongsTo
+     */
     public function image_job():BelongsTo
     {
         return $this->belongsTo(ImageJob::class,'image_jobs_id','id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function user():BelongsTo
+    {
+        return $this->belongsTo(User::class,'user_id','id');
     }
 }

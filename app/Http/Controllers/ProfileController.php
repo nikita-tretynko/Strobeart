@@ -15,13 +15,16 @@ use App\Http\Requests\UpdateUserBioRequest;
 use App\Http\Requests\UpdateUserBusinessRequest;
 use App\Http\Requests\UpdateUserLocationRequest;
 use App\Http\Requests\UpdateUserNameRequest;
+use App\Http\Requests\UploadFileRequest;
 use App\Http\Requests\WithdrawMoneyRequest;
 use App\Http\Responses\ApiErrorResponse;
 use App\Http\Responses\ApiResponse;
 use App\Models\Avatar;
+use App\Models\ImageJob;
 use App\Models\MoneyTransfer;
 use App\Models\StripeConnect;
 use App\Models\StyleGuide;
+use App\Models\UserFile;
 use App\Models\UserPlan;
 use App\Services\ImageService;
 use App\Services\MoneyTransferService;
@@ -32,6 +35,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 class ProfileController extends Controller
 {
@@ -141,7 +145,7 @@ class ProfileController extends Controller
     public function setting(Request $request): ApiResponse
     {
         $user = $request->user();
-        $user->load('avatar', 'connect_id','login_instagram','shopify_connect', 'user_card', 'plan', 'payment_history.user_editor',
+        $user->load('avatar', 'connect_id', 'login_instagram', 'shopify_connect', 'user_card', 'plan', 'payment_history.user_editor',
             'money_transfers_done.payment.user_business', 'money_transfers_done.payment_images');
         $account = StripeConnect::where('user_id', $user->id)->first();
         $short_info = $this->stripeService->getCardsStripeAccount($account);
@@ -162,23 +166,6 @@ class ProfileController extends Controller
         $data['user_id'] = $user->id;
         $style_guide = StyleGuide::create($data);
 
-        if ($request->hasfile('uploaded_logo')) {
-            $file = $request->file('uploaded_logo');
-            $images_url_array = $this->imageService->saveImageWork($file, ['path' => 'style_guide/logo']);
-            $style_guide->uploaded_logo = $images_url_array['image_url'];
-        }
-        if ($request->hasfile('upload_watermark')) {
-            $file = $request->file('upload_watermark');
-            $images_url_array = $this->imageService->saveImageWork($file, ['path' => 'style_guide/watermark']);
-            $style_guide->upload_watermark = $images_url_array['image_url'];
-        }
-        if ($request->hasfile('video_instructions')) {
-            $file = $request->file('video_instructions');
-            $images_url_array = $this->imageService->saveImageWork($file, ['path' => 'style_guide/video_instruction']);
-            $style_guide->video_instructions = $images_url_array['image_url'];
-        }
-        $style_guide->save();
-
         return new ApiResponse($style_guide);
     }
 
@@ -193,6 +180,27 @@ class ProfileController extends Controller
 
         return new ApiResponse($style_guide);
 
+    }
+
+    public function getFileJob($job_id): ApiResponse
+    {
+        $image_jobs = ImageJob::with('file_logo','file_watermark','file_video_instructions','file_typography', 'file_color_palette')->find($job_id);
+        $job_files[] = $image_jobs->file_logo;
+        $job_files[] = $image_jobs->file_watermark;
+        $job_files[] = $image_jobs->file_color_palette;
+        $job_files[] = $image_jobs->file_video_instructions;
+        $job_files[] = $image_jobs->file_typography;
+
+        return new ApiResponse($job_files);
+    }
+
+    public function getStyleJob(Request $request): ApiResponse
+    {
+        $user = $request->user();
+        $style_guides = StyleGuide::where('user_id', $user->id)->get();
+        $user_files = UserFile::where('user_id', $user->id)->get();
+
+        return new ApiResponse(compact('style_guides', 'user_files'));
     }
 
     /**
@@ -285,13 +293,13 @@ class ProfileController extends Controller
         $connect_id = $user->connect_id['connect_id'] ?? null;
         $user_account = $this->stripeService->connectedAccount($connect_id);
         $platform_payments = $user_account['capabilities']['platform_payments'] ?? null;
-        if ($user_account['verification']['disabled_reason']||($platform_payments!='active'))  {
+        if ($user_account['verification']['disabled_reason'] || ($platform_payments != 'active')) {
             return new ApiErrorResponse('Your Stripe Connect account hasn’t been verified yet. Please open Stripe from “Manage” button in Earnings section to finish verification.');
         } else {
             try {
-                $this->stripeService->payouts($data['amount'], $user_account['id'],$data['card_id']);
+                $this->stripeService->payouts($data['amount'], $user_account['id'], $data['card_id']);
                 $this->moneyTransferService->create($user->id, $data['amount'],
-                    MoneyTransferStatusEnum::$PAYED, TypeBalanceEnum::$WITHDRAWN,$data['amount'],
+                    MoneyTransferStatusEnum::$PAYED, TypeBalanceEnum::$WITHDRAWN, $data['amount'],
                     null, 'Withdraw to bank account');
             } catch (\Exception $exception) {
                 Log::info('Problem with transfer (MakeTransfersForUser):');
@@ -299,8 +307,10 @@ class ProfileController extends Controller
                 return new ApiErrorResponse($exception->getMessage());
             }
         }
+        $user->load('payment_history.user_editor', 'money_transfers_done.payment.user_business', 'money_transfers_done.payment_images');
+        $user['balance'] = MoneyTransfer::balance($user->id);
 
-        return new ApiResponse();
+        return new ApiResponse($user);
     }
 
     public function cancelMembershipPlan(Request $request)
@@ -308,5 +318,27 @@ class ProfileController extends Controller
         $user = $request->user();
         $user->plan->continuation_plan = false;
         $user->plan->save();
+    }
+
+    public function uploadUserFile(UploadFileRequest $request)
+    {
+        $user = $request->user();
+        $data = $request->validated();
+        try {
+            if ($request->hasfile('file')) {
+                $file = $request->file('file');
+                $name_file = time() . $file->getClientOriginalName();
+                $path = $file->storeAs(
+                    'files/user_id' . $user->id, $name_file, ['disk' => 'public']
+                );
+                $image_url = URL::to('/') . '/storage/' . 'files/user_id' . $user->id . '/' . $name_file;
+                $type_file = $file->getClientOriginalExtension();
+                UserFile::create(['user_id' => $user->id, 'file_name' => $data['file_name'], 'file_patch' => $path, 'file_url' => $image_url, 'type' => $type_file]);
+            }
+        } catch (\Exception $exception) {
+            return new ApiErrorResponse($exception);
+        }
+
+        return new ApiResponse();
     }
 }

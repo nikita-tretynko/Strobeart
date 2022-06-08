@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ImageJobStatusEnum;
 use App\Enums\UserSocialiteTypeEnum;
 use App\Exceptions\ApiValidationException;
+use App\Http\Requests\CreateReviewRequest;
 use App\Http\Requests\GetTokenFacebookRequest;
 use App\Http\Requests\GetTokenShopify;
 use App\Http\Requests\LoginShopify;
@@ -18,6 +19,7 @@ use App\Models\ImageJob;
 use App\Models\InstagramConnects;
 use App\Models\KeysUser;
 use App\Models\MoneyTransfer;
+use App\Models\Review;
 use App\Models\ShopifyConnects;
 use App\Models\SocialiteUser;
 use App\Models\StripeConnect;
@@ -90,19 +92,23 @@ class UserController extends Controller
     public function getUserProfile(Request $request): ApiResponse
     {
         $user = $request->user();
-        $user->load('avatar', 'style_guide');
+        $user->load('avatar', 'style_guide', 'user_files');
         if ($user->is_business()) {
             $past_job = ImageJob::where('user_id', $user->id)
                 ->where('status', ImageJobStatusEnum::$FINISHED)
-                ->with('images')
+                ->with('images', 'user_work.user', 'review')
                 ->get();
+            $user->load('user_files', 'style_guide.file_logo', 'style_guide.file_id_video_typography', 'style_guide.file_id_color_palette', 'style_guide.file_watermark', 'style_guide.file_video_instructions');
         } else {
             $user_worker_jobs = UserWorkJob::where('user_id', $user->id)->get()->pluck('image_jobs_id')->toArray();
             $past_job = ImageJob::whereIn('id', $user_worker_jobs)
                 ->where('status', ImageJobStatusEnum::$FINISHED)
-                ->with('images','images_decline')
-                ->withSum('finished_worked_images','sum_timers')
+                ->with('images', 'images_decline')
+                ->withSum('finished_worked_images', 'sum_timers')
                 ->get();
+
+            $user->load('editor_reviews.user.avatar');
+            $user['avg_rating'] = $user->editor_reviews->avg('rating');
         }
 
 
@@ -277,4 +283,20 @@ class UserController extends Controller
 
         return new ApiResponse(false);
     }
+
+    public function createReview(CreateReviewRequest $request): ApiResponse
+    {
+        $user = $request->user();
+        $data = $request->validated();
+        Review::create([
+            'user_id' => $user->id,
+            'to_user_id' => $data['to_user_id'],
+            'job_image_id' => $data['job_image_id'],
+            'rating' => $data['rating'],
+            'message' => $data['message'] ?? ''
+        ]);
+
+        return new ApiResponse();
+    }
+
 }

@@ -4,7 +4,7 @@
         <nav class="navbar navbar-expand-lg navbar-light ">
             <div class="container-fluid">
                 <router-link class="navbar-brand logo" :to="{ name: 'Login' }">
-                    StrobeArt
+                    <img class="logo_project" src="@/assets/icons/ST-logo_1.svg" alt="strobeart"/>
                 </router-link>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -124,7 +124,7 @@ export default {
 }
 
 .header {
-    padding: 31px 96px;
+    padding: 18px 96px;
     position: fixed;
     width: 100%;
     z-index: 999;
@@ -215,6 +215,9 @@ export default {
 .header_inf{
     position: relative;
     top: 7px;
+}
+.logo_project{
+
 }
 @media only screen and (max-width: 992px) {
     .header {

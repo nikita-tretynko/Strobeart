@@ -36,17 +36,23 @@ class PublishingImagesShopifyJob implements ShouldQueue
      */
     private User $user;
 
+    private string $alt_text;
+
+    private string $description;
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(User $user, PublishingFiles $publishingFiles, array $shopify_login, $product_id)
+    public function __construct(User $user, PublishingFiles $publishingFiles, array $shopify_login, $product_id,$description=null, $alt_text = null)
     {
         $this->shopify_login = $shopify_login;
         $this->publishingFiles = $publishingFiles;
         $this->product_id = $product_id;
         $this->user = $user;
+        $this->description = $description;
+        $this->alt_text = $alt_text;
     }
 
     /**
@@ -73,7 +79,7 @@ class PublishingImagesShopifyJob implements ShouldQueue
             foreach ($photos as $photo) {
                 $image = explode('storage/', $photo->image_url)[1];
                 $image_patch = storage_path('app/public/' . $image);
-                $shopify_service->addImagesToProduct($token, $shop, $this->product_id, $this->codeImageIn64($image_patch));
+                $shopify_service->addImagesToProduct($token, $shop, $this->product_id, $this->codeImageIn64($image_patch,null, $this->alt_text));
             }
 
         } catch (\Exception $exception) {
@@ -84,9 +90,10 @@ class PublishingImagesShopifyJob implements ShouldQueue
     /**
      * @param string $real_image_path
      * @param string|null $image_name
+     * @param string|null $alt_text
      * @return array
      */
-    private function codeImageIn64(string $real_image_path, string $image_name = null): array
+    private function codeImageIn64(string $real_image_path, string $image_name = null, string $alt_text = null): array
     {
         $file = file_get_contents($real_image_path);
         $base64_code = base64_encode($file);
@@ -95,6 +102,14 @@ class PublishingImagesShopifyJob implements ShouldQueue
         return [
             'attachment' => $base64_code,
             'filename' => $image_name,
+            'metafields' => [
+                [
+                    "key" => "alt",
+                    "value" => $alt_text,
+                    "type" => "string",
+                    "namespace" => "tags"
+                ]
+            ]
         ];
     }
 }

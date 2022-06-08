@@ -177,8 +177,8 @@ class TwilioService
                 $chat_job->delete();
                 $this->deleteChannel($image_job_id);
             }
-        }catch (Exception $exception){
-            Log::info('ERRoR delete chat:' .$exception);
+        } catch (Exception $exception) {
+            Log::info('ERRoR delete chat:' . $exception);
         }
     }
 
@@ -203,5 +203,19 @@ class TwilioService
             Log::info("Error: " . $e->getMessage());
         }
 
+    }
+
+    public function sendMessage($user, $channel, $message): string
+    {
+        $sid = getenv("TWILIO_ACCOUNT_SID");
+        $token = getenv("TWILIO_ACCOUNT_TOKEN");
+        $twilio = new Client($sid, $token);
+
+        $message = $twilio->chat->v2->services(getenv("TWILIO_SERVICE_SID"))
+            ->channels($channel)
+            ->messages
+            ->create(["body" => $message,"from"=>$user->id]);
+
+        return $message->sid;
     }
 }

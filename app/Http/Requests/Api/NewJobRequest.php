@@ -31,17 +31,21 @@ class NewJobRequest extends ApiRequest
         return [
             'images.*.src' => ['required', 'string'],
             'images.*.name' => ['required', 'string'],
-            'files.*' =>['required'],
+            'files.*' => ['required'],
             'due_date' => ['required', 'date'],
             'editing_level' => ['required', 'string'],
             'style_guide' => ['sometimes', 'nullable', 'string'],
             'color_profile' => ['required', 'string'],
             'file_format' => ['required', 'string'],
             'other' => ['sometimes', 'nullable', 'string'],
-            'add_logo' => ['sometimes', 'boolean'],
-            'add_watermark' => ['sometimes', 'boolean'],
+            'add_logo' => ['nullable', 'numeric'],
+            'add_watermark' => ['nullable', 'numeric'],
+            'file_id_video_instruction' => ['nullable', 'numeric'],
+            'color_palette' => ['nullable', 'numeric'],
+            'typography' => ['nullable', 'numeric'],
             'white_background' => ['sometimes', 'boolean'],
             'red_eye' => ['sometimes', 'boolean'],
+            'timezone'=> ['required'],
         ];
     }
 }

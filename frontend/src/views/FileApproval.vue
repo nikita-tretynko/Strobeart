@@ -212,11 +212,18 @@
                                 class="modal_image"
                                 v-if="modal_image"
                             >
-                                <carousel :per-page="1" :mouse-drag="true" :touch-drag="true">
+
+                                <carousel class="carousel_mob" :per-page="1" :mouse-drag="true" :touch-drag="true">
                                     <slide v-for="image in getImages(modal_image)">
                                         <img :src="image" alt="">
                                     </slide>
                                 </carousel>
+                                <div class="carousel_desc">
+                                    <div class="position-relative">     <div class="img_before">BEFORE</div>
+                                        <img :src="getImages(modal_image)[1]" alt=""></div>
+                                    <div class="position-relative">  <div class="img_after">AFTER</div>
+                                        <img :src="getImages(modal_image)[0]" alt=""></div>
+                                </div>
                                 <!--                                <img :src="getImages(modal_image)[0]">-->
                                 <button
                                     @click="toggleApproval(modal_image)"
@@ -384,14 +391,14 @@ export default {
             'hideLoader',
         ]),
         getWorkedImg(image){
-            return image?.worked_img?.image_url || image.src_cropped;
+            return image?.worked_img?.image_url || image.src;
         },
         getImages(image) {
             let img = []
             if (image?.worked_img?.image_url || null) {
                 img.push(image?.worked_img?.image_url || null)
             }
-            img.push(image.src_cropped)
+            img.push(image.src)
             return img
         },
         closeModelReview() {
@@ -975,12 +982,40 @@ button:disabled {
 #acceptModalReview .modal-body.feedback_body {
     min-height: 190px;
 }
-
+.carousel_mob{
+    display: none;
+}
+.carousel_desc{
+    display: flex;
+    position: relative;
+}
+.img_before{
+    position: absolute;
+    font-weight: 600;
+    font-size: 20px;
+    color:#494949;
+    top: 3px;
+    left: 6px;
+}
+.img_after{
+    position: absolute;
+    font-weight: 600;
+    font-size: 20px;
+   color:#494949;
+    top: 3px;
+    left: 6px;
+}
 @media only screen and (max-width: 580px) {
 
 }
 
 @media only screen and (max-width: 992px) {
+    .carousel_mob{
+        display: block;
+    }
+    .carousel_desc{
+        display: none;
+    }
     #acceptModalReview .box-btn {
         padding-top: 0px;
     }
