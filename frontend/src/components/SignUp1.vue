@@ -139,6 +139,12 @@ export default {
     },
     mounted() {
     },
+    created: function () {
+        window.addEventListener('keyup', this.keyupMethod)
+    },
+    beforeDestroy() {
+        window.removeEventListener('keyup', this.keyupMethod);
+    },
     computed: {
         active_btn() {
             return (
@@ -154,6 +160,11 @@ export default {
             'setPhone',
             'setLogged',
         ]),
+        keyupMethod(e){
+            if (e.keyCode === 13) {
+                this.signUp()
+            }
+        },
         keypressEmail() {
             this.email_is_valid = false
         },

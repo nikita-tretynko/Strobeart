@@ -10,7 +10,10 @@ import VueLazyload from 'vue-lazyload'
 import preview from 'vue-photo-preview'
 import 'vue-photo-preview/dist/skin.css'
 Vue.use(preview)
+import VueTippy, { TippyComponent } from "vue-tippy";
 
+Vue.use(VueTippy);
+Vue.component("tippy", TippyComponent);
 import error_img from './assets/load-loading.gif';
 import loading_img from './assets/load-loading.gif';
 Vue.use(VueLazyload, {

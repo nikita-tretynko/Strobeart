@@ -316,7 +316,7 @@ export default {
             this.requirements.add_watermark = this.requirements?.style_guide?.file_id_watermark ||''
             this.requirements.file_id_video_instruction = this.requirements?.style_guide?.file_id_video_instructions ||''
             this.requirements.file_id_color_palette = this.requirements?.style_guide?.file_id_color_palette ||''
-            this.requirements.file_id_typography = this.requirements?.style_guide?.file_id_typography ||''
+            this.requirements.file_id_typography = this.requirements?.style_guide?.file_id_video_typography ||''
         },
         async getUserStyleGuide() {
             try {

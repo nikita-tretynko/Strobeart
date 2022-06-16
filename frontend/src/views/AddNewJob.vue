@@ -557,8 +557,8 @@ export default {
                     file_id_video_instruction: this.requirements.file_id_video_instruction,
                     white_background: this.requirements.checked_option.white_background,
                     red_eye: this.requirements.checked_option.red_eye,
-                    color_palette:this.requirements.color_palette,
-                    typography:this.requirements.typography,
+                    color_palette:this.requirements.file_id_color_palette,
+                    typography:this.requirements.file_id_typography,
                     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 });
                 data.append('body', body);

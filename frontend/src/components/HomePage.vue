@@ -44,7 +44,7 @@
                                                         }}
                                                     </div>
                                                     <div v-bind:class="{ text_red: diffDate(job.due_date)<3 }">
-                                                        {{ diffDate(job.due_date) }} days left to complition
+                                                        {{ diffDate(job.due_date) }} days left to completion
                                                     </div>
                                                 </div>
                                             </div>

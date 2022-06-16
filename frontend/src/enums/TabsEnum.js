@@ -6,7 +6,7 @@ export default class TabsEnum {
         },
         {
             title: 'Add Requirements',
-            description: 'Please add any details that would help the editor to create best work.',
+            description: 'Please add any details that would help the editor better your job.',
         },
         {
             title: 'Add Due Date',

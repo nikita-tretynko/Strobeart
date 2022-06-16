@@ -53,6 +53,35 @@
                                 <div class="title_2">Size:</div>
                                 <div class="desc2 title_3 msdt">300 x 300 px</div>
                             </div>
+                            <div class="job_info_item">
+                                <div class="title_2">Watermark:</div>
+                                <div class="desc2 title_3 msdt">{{ jobDetails.add_watermark ? 'Yes' : 'No' }}</div>
+                            </div>
+                            <div class="job_info_item">
+                                <div class="title_2">Video Instructions:</div>
+                                <div class="desc2 title_3 msdt">{{ jobDetails.file_id_video_instruction ? 'Yes' : 'No' }}</div>
+                            </div>
+                            <div class="job_info_item">
+                                <div class="title_2">Color palette:</div>
+                                <div class="desc2 title_3 msdt">{{ jobDetails.color_palette ? 'Yes' : 'No' }}</div>
+                            </div>
+                            <div class="job_info_item">
+                                <div class="title_2">Typography:</div>
+                                <div class="desc2 title_3 msdt">{{ jobDetails.typography ? 'Yes' : 'No' }}</div>
+                            </div>
+                            <div class="job_info_item">
+                                <div class="title_2">Red eye:</div>
+                                <div class="desc2 title_3 msdt">{{ jobDetails.red_eye ? 'Yes' : 'No' }}</div>
+                            </div>
+                            <div class="job_info_item">
+                                <div class="title_2">File Format:</div>
+                                <div class="desc2 title_3 msdt">{{ jobDetails.file_format }}</div>
+                            </div>
+                            <div class="job_info_item">
+                                <div class="title_2">Other:</div>
+                                <div class="desc2 title_3 msdt">{{ jobDetails.other ? jobDetails.other : 'None' }}</div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -236,7 +265,7 @@ export default {
 }
 
 .title_2 {
-    width: 118px;
+    width: 170px;
     text-align: right;
     font-style: normal;
     font-weight: 600;

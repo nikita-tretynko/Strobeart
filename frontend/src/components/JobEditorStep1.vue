@@ -5,7 +5,7 @@
         <div class="d-flex justify-content-center mt-4">
             <div class="btn_dsg" @click="downloadStyleGuides">
                 Download style guides
-                <img class="info_btn-dsg" src="@/assets/icons/info.svg" alt=""/>
+                <img content="All the additional files need to finish the job like logos, watermarks, colour pallet etc" v-tippy="{ placement : 'top',  arrow: true }" class="info_btn-dsg" src="@/assets/icons/info.svg" alt=""/>
             </div>
         </div>
         <div class="pt-110 pb_images images">

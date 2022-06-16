@@ -7,7 +7,7 @@
             <div class="montserrat form_sign_in mb-4">
                 <div class="login">Login</div>
                 <div class="mb-4">
-                    <input type="email" autocomplete="off" v-model="email" @keypress="keypressEmail"
+                    <input  type="email" autocomplete="off" v-model="email" @keypress="keypressEmail"
                            :class="{ 'is-invalid': email_is_valid }" class="form-control" id="emailSignUp"
                            placeholder="e-mail">
                     <div id="emailSignUpFeedback" class="invalid-feedback">{{ email_is_valid }}</div>
@@ -32,7 +32,6 @@
                     <router-link class="style_link" :to="{ name: 'Registration' }">I don’t have an account yet.</router-link>
                 </div>
             </div>
-
         </div>
     </div>
 </template>
@@ -61,6 +60,12 @@ export default {
     },
     mounted() {
     },
+    created: function () {
+        window.addEventListener('keyup', this.keyupMethod)
+    },
+    beforeDestroy() {
+        window.removeEventListener('keyup', this.keyupMethod);
+    },
     computed: {
         active_btn() {
             return (
@@ -75,6 +80,11 @@ export default {
             'setUser',
             'setLogged',
         ]),
+       keyupMethod(e){
+            if (e.keyCode === 13) {
+              this.signIn()
+            }
+        },
         forgotPassword(){
             this.$emit('signIn',
                 LoginEnum.FORGOT_PASSWORD,
